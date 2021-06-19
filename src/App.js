@@ -16,15 +16,21 @@ import Footer from './components/Footer';
 
 function App() {
   const [Data, setBankData] = useState([]);
-  const [currentAccount, setAccount] = useState(null);
+  const [currentAccount, setAccount] = useState({});
   const history = createBrowserHistory();
   useEffect(() => {
     console.log("In useEffect")
     fetchData()
   }, [])
+  useEffect(()=>{
+    if(!currentAccount){
+      console.log("Account Changed")
+      changeAccount(currentAccount.accountNo)
+    }
+  },[Data])
   const fetchData = () => {
     axios.get('http://localhost:5000/').then((res) => {
-      console.log(res.data);
+      console.log(res.data,"Data Fetched");
       setBankData(res.data)
     })
   }
@@ -44,29 +50,13 @@ function App() {
       Amount: Amount
     }
     postDatas(postD)
-    const toIndex = Data.findIndex((acc) => {
-      return acc.accountNo === toAccount.accountNo
-    })
-    const fromIndex = Data.findIndex((acc) => {
-      return acc.accountNo === fromAccount.accountNo
-    })
-    Data[toIndex].balance += Amount
-    Data[fromIndex].balance -= Amount
-    // console.log(Data)
-    setBankData(Data)
-
-    
-    
-    // alert("Transfer Succesful")
-
   }
   const postDatas = (postData) => {
     axios.post('http://localhost:5000/', postData)
       .then((res) => {
-        console.log(res)
-        if (res.status===200) {
+        // console.log(res)
+        if (res.status === 200) {
           fetchData()
-          alert("Transfer Succesful")
         }
       }).catch((err) => {
         console.log(err)

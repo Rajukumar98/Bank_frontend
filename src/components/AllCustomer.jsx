@@ -8,19 +8,19 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import { Button,Box,Grid } from '@material-ui/core';
+import { Button, Box, Grid } from '@material-ui/core';
 import BackImage from "../back.jpg"
 import {
     Link,
 } from "react-router-dom";
 
 const columns = [
-    { id: 'accountNo', label: 'Account Number', minWidth: 170, align: 'center' },
-    { id: 'name', label: 'Name', minWidth: 150, align: 'center' },
+    { id: 'accountNo', label: 'Account Number', minWidth: 120, align: 'center' },
+    { id: 'name', label: 'Name', minWidth: 130, align: 'center' },
     {
         id: 'email',
         label: 'Email',
-        minWidth: 170,
+        minWidth: 150,
         align: 'center',
     },
 
@@ -39,14 +39,17 @@ const columns = [
 ];
 
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
     },
     container: {
-        maxHeight: "73vh",
+        maxHeight: "75vh",
     },
-});
+    butt:{
+        backgroundColor: theme.palette.success.main
+    }
+}));
 
 export default function AllCustomer(props) {
     const classes = useStyles();
@@ -62,75 +65,76 @@ export default function AllCustomer(props) {
         setPage(0);
     };
     const rows = props.BankData;
+    
 
     return (
         <Box width="100%" bgcolor="yellow" style={{
             backgroundImage: `url(${BackImage})`,
             backgroundSize: "cover",
-            height: "78.1vh",
+            height: "86.1vh",
             color: "#f5f5f5"
         }} >
             <Grid container>
-              <Grid item sm={2} xs={0}></Grid>
-              <Grid item sm={8} xs={12}>
-              <Paper className={classes.root}>
-            <TableContainer className={classes.container}>
-                <Table stickyHeader aria-label="sticky table">
-                    <TableHead>
-                        <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    align={column.align}
-                                    style={{ minWidth: column.minWidth }}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                            return (
-                                <TableRow hover role="checkbox" tabIndex={-1} key={row.accountNo}>
-                                    {columns.map((column) => {
-                                        const value = row[column.id];
-                                        return (
-                                            <TableCell key={column.id} align={column.align}>
-                                                {column.format && typeof value === 'number' ? column.format(value) : value}
+                <Grid item sm={2} xs={0}></Grid>
+                <Grid item sm={8} xs={12}>
+                    <Paper className={classes.root}>
+                        <TableContainer className={classes.container}>
+                            <Table stickyHeader aria-label="sticky table">
+                                <TableHead>
+                                    <TableRow>
+                                        {columns.map((column) => (
+                                            <TableCell
+                                                key={column.id}
+                                                align={column.align}
+                                                style={{ minWidth: column.minWidth }}
+                                            >
+                                                {column.label}
                                             </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                                        return (
+                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.accountNo}>
+                                                {columns.map((column) => {
+                                                    const value = row[column.id];
+                                                    return (
+                                                        <TableCell key={column.id} align={column.align}>
+                                                            {column.format && typeof value === 'number' ? column.format(value) : value}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                                <TableCell align="center">
+                                                    <Button variant="contained" className={classes.butt} onClick={(e) => {
+                                                        console.log("Button Clicked", row.accountNo)
+                                                        props.changeAccount(row.accountNo)
+                                                    }}>
+                                                        <Link to="/customer" style={{ "textDecoration": "none", "color": "white" }}>
+                                                            View Details
+                                            </Link>
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
                                         );
                                     })}
-                                    <TableCell align="center">
-                                        <Button variant="contained" color="primary" onClick={(e) => {
-                                            console.log("Button Clicked", row.accountNo)
-                                            props.changeAccount(row.accountNo)
-                                        }}>
-                                            <Link to="/customer" style={{ "textDecoration": "none", "color": "white" }}>
-                                                View Details
-                                            </Link>
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={handleChangePage}
-                onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-        </Paper>
-              </Grid>
-              <Grid item sm={2} xs={0}></Grid>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <TablePagination
+                            rowsPerPageOptions={[10, 25, 100]}
+                            component="div"
+                            count={rows.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onChangePage={handleChangePage}
+                            onChangeRowsPerPage={handleChangeRowsPerPage}
+                        />
+                    </Paper>
+                </Grid>
+                <Grid item sm={2} xs={0}></Grid>
             </Grid>
-          </Box>
-        
+        </Box>
+
     );
 }

@@ -1,9 +1,9 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
-import { Typography, Grid, Box } from '@material-ui/core';
+import { Typography, Grid, Box, Paper } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -14,9 +14,11 @@ import InputLabel from '@material-ui/core/InputLabel';
 import { MenuItem, TextField } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import BackImage from "../195..jpg"
-import {
-    Link
-} from "react-router-dom";
+import axios from "axios";
+import Draggable from 'react-draggable';
+// import {
+//     Link
+// } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
     root: {
         minHeight: 220
@@ -47,16 +49,35 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+function PaperComponent(props) {
+    return (
+        <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
+            <Paper {...props} />
+        </Draggable>
+    );
+}
+
 function Customer(props) {
     const classes = useStyles();
-    console.log(props.account)
     const maxWidth = 'sm'
     const fullWidth = true
-    const [open, setOpen] = React.useState(false);
-    const [Amount, setAmount] = React.useState(true);
-    const [toAccount, setToAccount] = React.useState('sm');
-    // const [fromAccount, setFromAccount] = React.useState(props.account);
-    // console.log(fromAccount)
+    const [open, setOpen] = useState(false);
+    const [Amount, setAmount] = useState(true);
+    const [toAccount, setToAccount] = useState('sm');
+    const [currAccount, setCurrAccount] = useState(props.account);
+    // console.log(currAccount, "new Data")
+    useEffect(() => {
+        setTimeout(() => {
+            fetchd()
+        }, 1000)
+
+    }, [open])
+    const fetchd = () => {
+        axios.post('http://localhost:5000/custom', currAccount).then((res) => {
+            // console.log(res.data, "Data Fetched");
+            setCurrAccount(res.data)
+        })
+    }
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -64,19 +85,21 @@ function Customer(props) {
 
     const handleClose = () => {
         setOpen(false);
+        fetchd()
 
     };
     const handleTransfer = () => {
-        const valid = props.account.balance >= Amount
-        console.log("props.account.balance", props.account.balance >= Amount)
+        const valid = currAccount.balance >= Amount
+        console.log("currAccount.balance", currAccount.balance >= Amount)
         if (!valid) {
-            console.log("Not Valid , from: ", props.account, " to: ", toAccount, " Amount: ", Amount)
+            console.log("Not Valid , from: ", currAccount, " to: ", toAccount, " Amount: ", Amount)
             alert("Sorry, This Account has Insufficient Balance ")
         } else {
-            console.log(" Valid , from: ", props.account, " to: ", toAccount, " Amount: ", Amount)
-            props.transfer(props.account, toAccount, Amount)
-            // setFromAccount(props.account.balance-Amount)
+            console.log(" Valid , from: ", currAccount, " to: ", toAccount, " Amount: ", Amount)
+            props.transfer(currAccount, toAccount, Amount)
+            // setFromAccount(currAccount.balance-Amount)
             setOpen(false);
+            handleConfirmClickOpen(true)
         }
     }
 
@@ -86,9 +109,19 @@ function Customer(props) {
 
 
     const allAccount = props.AllData.filter((acc) => {
-        return acc.accountNo !== props.account.accountNo
+        return acc.accountNo !== currAccount.accountNo
     })
-    // console.log(allAccount)
+
+    const [cOpen, setCOpen] = React.useState(false);
+
+    const handleConfirmClickOpen = () => {
+        setCOpen(true);
+    };
+
+    const handleConfirmClose = () => {
+        setCOpen(false);
+    };
+
 
     return (
         <Box
@@ -97,27 +130,27 @@ function Customer(props) {
             style={{
                 backgroundImage: `url(${BackImage})`,
                 backgroundSize: "cover",
-                height: "78vh",
+                height: "86.1vh",
                 color: "#f5f5f5"
             }}>
             <Grid container>
                 <Grid item sm={4} xs={2}></Grid>
                 <Grid item sm={4} xs={8}>
-                    <Box mt={20}>
+                    <Box mt="10vh">
                         <Grid container justify="center">
                             <Card className={classes.root}>
                                 <CardContent>
                                     <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                        Customer Name: {props.account.name}
+                                        Customer Name: {currAccount.name}
                                     </Typography>
                                     <Typography variant="h5" component="h2">
-                                        Account Number: {props.account.accountNo}
+                                        Account Number: {currAccount.accountNo}
                                     </Typography>
                                     <Typography className={classes.pos} color="textSecondary">
-                                        Email:  {props.account.email}
+                                        Email:  {currAccount.email}
                                     </Typography>
                                     <Typography variant="body2" component="p">
-                                        Account Balance:  {props.account.balance}
+                                        Account Balance:  {currAccount.balance}
                                     </Typography>
                                 </CardContent>
                                 <Grid container justify="center" alignItems="center" >
@@ -181,11 +214,31 @@ function Customer(props) {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleTransfer} color="primary">
-                            {/* <Link to="/customer" style={{ "textDecoration": "none", "color": "black" }}> */}
+                                {/* <Link to="/customer" style={{ "textDecoration": "none", "color": "black" }}> */}
                                 Transfer
                             {/* </Link> */}
-                                
-                    </Button>
+
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                    <Dialog
+                        open={cOpen}
+                        onClose={handleConfirmClose}
+                        PaperComponent={PaperComponent}
+                        aria-labelledby="draggable-dialog-title"
+                    >
+                        <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
+                            Subscribe
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                Transaction Successful
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button autoFocus onClick={handleConfirmClose} color="primary">
+                                Ok
+                            </Button>
                         </DialogActions>
                     </Dialog>
                 </Grid>
